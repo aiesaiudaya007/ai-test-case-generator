@@ -1,0 +1,9 @@
+anthropic>=0.40.0
+requests>=2.31.0
+python-dotenv>=1.0.1
+openpyxl>=3.1.2
+tenacity>=8.2.3
+
+# --- SDLC webhook integration (webhook_server.py) ---
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0

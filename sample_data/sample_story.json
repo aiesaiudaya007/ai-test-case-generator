@@ -1,0 +1,16 @@
+{
+  "key": "PROJ-482",
+  "summary": "Allow users to reset their password via email link",
+  "description": "As a registered user who has forgotten my password, I want to request a password reset link by email so that I can regain access to my account without contacting support.\n\nThe reset link should expire after 30 minutes and be single-use. Password must meet the existing complexity policy (min 8 chars, 1 number, 1 special character).",
+  "acceptance_criteria": [
+    "Given a registered email, when the user submits 'Forgot Password', then a reset link is emailed within 60 seconds.",
+    "Given an unregistered email, when the user submits 'Forgot Password', then a generic confirmation message is shown without revealing whether the account exists.",
+    "Given a valid reset link, when the user opens it within 30 minutes, then they can set a new password that meets the complexity policy.",
+    "Given a reset link older than 30 minutes, when the user opens it, then they see an 'expired link' message and can request a new one.",
+    "Given a reset link that has already been used once, when the user opens it again, then it is rejected as invalid.",
+    "Given a new password that does not meet the complexity policy, when the user submits it, then an inline validation error is shown and the password is not changed."
+  ],
+  "issue_type": "Story",
+  "status": "In Progress",
+  "labels": ["auth", "security"]
+}
