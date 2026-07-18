@@ -6,3 +6,4 @@ output/
 .venv/
 venv/
 *.egg-info/
+.idea/
