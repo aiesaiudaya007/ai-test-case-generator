@@ -21,6 +21,11 @@ logger = logging.getLogger(__name__)
 # if you know yours. Otherwise we fall back to parsing the description text.
 DEFAULT_AC_FIELD_ID: Optional[str] = None
 
+# Matches a line that is *only* an "Acceptance Criteria" heading, optionally
+# prefixed with markdown-style '#'s (added by _walk_adf for ADF heading nodes)
+# and an optional trailing colon. Deliberately anchored to the whole line
+# (^...$) so it doesn't match the phrase appearing mid-sentence elsewhere.
+_AC_HEADING_RE = re.compile(r"^\s*#{0,3}\s*acceptance criteria\s*:?\s*$", re.IGNORECASE)
 
 class JiraClientError(RuntimeError):
     pass
@@ -122,16 +127,45 @@ class JiraClient:
     # ---------- Acceptance criteria heuristics ----------
 
     def _extract_ac_from_description(self, description: str) -> List[str]:
-        """Look for a heading like 'Acceptance Criteria' and grab the bullets under it."""
+        """Look for a line that is exactly an 'Acceptance Criteria' heading and
+        pull only the contiguous bullet items directly beneath it.
+
+        Deliberately conservative in two ways that earlier versions weren't:
+          1. If no such heading is found at all, this returns an empty list
+             rather than falling back to treating the *entire* description as
+             a list of acceptance criteria -- narrative prose lines aren't AC.
+          2. Once collecting bullets, it stops at the first blank line, the
+             next heading, or the first non-bullet paragraph line -- so a
+             later, unrelated section (e.g. "Notes", "Out of scope") never
+             gets swept into the AC list just because it lacked a heading
+             marker.
+        """
         if not description:
             return []
-        pattern = re.compile(
-            r"(?:^|\n)\s*#{0,3}\s*acceptance criteria[:\s]*\n(.*?)(?=\n##|\Z)",
-            re.IGNORECASE | re.DOTALL,
-        )
-        match = pattern.search(description)
-        block = match.group(1) if match else description
-        return self._split_lines(block)
+
+        lines = description.splitlines()
+        start = None
+        for i, raw_line in enumerate(lines):
+            if _AC_HEADING_RE.match(raw_line.strip()):
+                start = i + 1
+                break
+        if start is None:
+            return []
+        items: List[str] = []
+        for raw_line in lines[start]:
+            line = raw_line.strip()
+            if not line:
+                if items:
+                    break # blank line after we've already collected bullets -> section ended
+                continue  # skip blank lines between the heading and the first bullet
+            if line.startswith("#"):
+                break  # the next heading -> acceptance criteria section ended
+            if not line.startswith("_"):
+                break  # a non-bullet paragraph right after the heading -- stop rather than guess
+            item = line.lstrip("_").strip()
+            if item:
+                items.append(item)
+        return items
 
     @staticmethod
     def _split_lines(text: str) -> List[str]:

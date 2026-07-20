@@ -134,10 +134,10 @@ Call record_scenarios with the full list."""
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=15))
     def generate_test_cases(self, story: Story, scenario: Scenario) -> List[TestCase]:
         prompt = f"""You are a senior QA engineer writing executable test cases for one
-test scenario derived from a Jira story. Be concrete: steps must be actions a tester
-can literally follow, with real sample test data, and an unambiguous expected result.
-Write 1-4 test cases depending on how much the scenario needs (e.g. a "Negative" or
-"Boundary" scenario often needs a couple of variants with different data).
+                     test scenario derived from a Jira story. Be concrete: steps must be actions a tester
+                     can literally follow, with real sample test data, and an unambiguous expected result.
+                     Write 1-4 test cases depending on how much the scenario needs (e.g. a "Negative" or
+                     "Boundary" scenario often needs a couple of variants with different data).
 
 Story: {story.key} - {story.summary}
 

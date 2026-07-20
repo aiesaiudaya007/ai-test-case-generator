@@ -7,3 +7,5 @@ tenacity>=8.2.3
 # --- SDLC webhook integration (webhook_server.py) ---
 fastapi>=0.115.0
 uvicorn[standard]>=0.32.0
+
+pydantic
