@@ -1,0 +1,6 @@
+# Dev/test-only dependencies -- not needed to run main.py or webhook_server.py
+# in production, only to run the test suite locally / in CI.
+-r requirements.txt
+
+pytest>=8.0.0
+httpx>=0.27.0   # required by fastapi.testclient.TestClient
